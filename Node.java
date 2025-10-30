@@ -9,6 +9,11 @@ public class Node {
         this.operation = op;
     }
 
+ 
+    public Node getLeft()  { return lChild; }
+    public Node getRight() { return rChild; }
+    public Op getOperation() { return operation; }
+
     public boolean isLeaf() {
         return !(operation instanceof Binop);
     }
@@ -19,62 +24,64 @@ public class Node {
             if (lChild == null || rChild == null) {
                 throw new NullPointerException("Binop node missing child(ren)");
             }
-            double leftVal = lChild.eval(data);
-            double rightVal = rChild.eval(data);
-            return ((Binop) operation).eval(leftVal, rightVal);
+            double a = lChild.eval(data);
+            double b = rChild.eval(data);
+            return ((Binop) operation).eval(a, b);
         } else if (operation instanceof Unop) {
             return ((Unop) operation).eval(data);
         } else if (operation instanceof Variable) {
             return ((Variable) operation).eval(data);
         } else if (operation instanceof Const) {
-            return ((Const) operation).eval();
+            return ((Const) operation).eval(data);
         } else {
             throw new IllegalStateException("Unknown operation type: " + operation.getClass());
         }
     }
 
-    // add children recursively
+    // build random children where appropriate
     public void addRandomKids(NodeFactory factory, int maxDepth, Random rand) {
         if (maxDepth <= 0) return;
 
         if (operation instanceof Binop) {
-            lChild = factory.getOperator(rand);
-            rChild = factory.getOperator(rand);
+            // both children
+            if (lChild == null) lChild = new Node(factory.getOperator(rand));
+            if (rChild == null) rChild = new Node(factory.getOperator(rand));
             lChild.addRandomKids(factory, maxDepth - 1, rand);
             rChild.addRandomKids(factory, maxDepth - 1, rand);
         } else if (operation instanceof Unop) {
-            lChild = factory.getOperator(rand);
+            // unary gets a single left child
+            if (lChild == null) lChild = new Node(factory.getOperator(rand));
             lChild.addRandomKids(factory, maxDepth - 1, rand);
         } else {
-            // terminal node — no children
+            // terminal node - no children
         }
     }
 
-    // collect all Binop nodes for the Collector
+    // traverse and let collector see binops
     public void traverse(Collector c) {
         if (operation instanceof Binop) {
-            c.collect(this);
+            c.collect(this); 
         }
         if (lChild != null) lChild.traverse(c);
         if (rChild != null) rChild.traverse(c);
     }
 
-    // swap this node entire subtree with another
+    // Swap entire subtrees with another node
     public void swapWith(Node other) {
-        Op tempOp = this.operation;
-        Node tempL = this.lChild;
-        Node tempR = this.rChild;
+        Op opTmp = this.operation;
+        Node lTmp = this.lChild;
+        Node rTmp = this.rChild;
 
         this.operation = other.operation;
         this.lChild = other.lChild;
         this.rChild = other.rChild;
 
-        other.operation = tempOp;
-        other.lChild = tempL;
-        other.rChild = tempR;
+        other.operation = opTmp;
+        other.lChild = lTmp;
+        other.rChild = rTmp;
     }
 
-    // convert node to readable infix string
+    // readable infix
     public String toString() {
         if (operation instanceof Binop) {
             String left = (lChild != null) ? lChild.toString() : "?";
@@ -84,11 +91,12 @@ public class Node {
             String inner = (lChild != null) ? lChild.toString() : "?";
             return operation.toString() + "(" + inner + ")";
         } else {
+            // const or variable prints via its own toString
             return operation.toString();
         }
     }
 
-    // string used for Collector test pattern
+    // pattern string used by collector tests for binops
     public String patternString() {
         if (operation instanceof Binop) {
             String left = (lChild != null) ? lChild.patternString() : "?";
@@ -98,3 +106,4 @@ public class Node {
             return "?";
         }
     }
+}
