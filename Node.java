@@ -1,53 +1,55 @@
+/ node class for algebraic trees
+
 public class Node {
     Op op;
     Node lChild;
     Node rChild;
 
+    // constructor
     public Node(Op o) {
         op = o;
         lChild = null;
         rChild = null;
     }
 
+    // add random kids using the factory
     public void addRandomKids(NodeFactory n, int maxDepth, java.util.Random rand) {
         op.addRandomKids(this, n, maxDepth, rand);
     }
 
+    // evaluate this node on given data
     public double eval(double[] data) {
         return op.eval(this, data);
     }
 
+    // convert this node into a readable string
     public String toString() {
         return op.toString(this);
     }
 
    
-
-    // vis all nodes in preorder
     public void traverse(Collector c) {
         c.collect(this);
         if (this.lChild != null) this.lChild.traverse(c);
         if (this.rChild != null) this.rChild.traverse(c);
     }
 
-    // return true if this node has no children (a leaf)
+    // leaf check: true if this node has no children
     public boolean isLeaf() {
-        boolean hasLeft = (this.lChild != null);
-        boolean hasRight = (this.rChild != null);
-        return !(hasLeft || hasRight);
+        return this.lChild == null && this.rChild == null;
     }
 
-    // swap this nodes left child with trunks left child shout out dragon ball z
+    // swap this node's left child with trunk's left child , i want to call node gohan
     public void swapLeft(Node trunk) {
         Node temp = this.lChild;
         this.lChild = trunk.lChild;
         trunk.lChild = temp;
     }
 
-    // swap this node's right child with trunk's right child, i was so tempted to call this node gohan but
+    // swap this node's right child with trunk's right child, shout out dbz rip toriyam
     public void swapRight(Node trunk) {
         Node temp = this.rChild;
         this.rChild = trunk.rChild;
         trunk.rChild = temp;
     }
-}
+
