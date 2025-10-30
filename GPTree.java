@@ -7,7 +7,6 @@ public class GPTree {
     private final Random rand;
     private Node root;
 
-    
     private String crossNodes = "";
 
     public GPTree(NodeFactory factory, int maxDepth, Random rand) {
@@ -27,32 +26,35 @@ public class GPTree {
         return (root == null) ? "" : root.toString();
     }
 
-  
-public void traverse() {
-    if (root == null) {
-        crossNodes = "";
-        return;
-    }
-
-    final StringBuilder sb = new StringBuilder();
-
-    // Walk the tree and collect ONLY binops, using placeholder form
-    root.traverse(new Collector() {
-        @Override
-        public void collect(Node n) {
-            sb.append(n.asPlaceholder()).append('\n');
+    public void traverse() {
+        if (root == null) {
+            crossNodes = "";
+            return;
         }
-    });
 
-    // Trim the trailing newline if we added anything; else leave as truly empty
-    if (sb.length() > 0) {
-        sb.setLength(sb.length() - 1);
-        crossNodes = sb.toString();
-    } else {
-        crossNodes = "";
+        final StringBuilder sb = new StringBuilder();
+
+     
+        root.traverse(new Collector() {
+            @Override
+            public void collect(Node n) {
+                sb.append(n.asPlaceholder()).append('\n');
+            }
+        });
+
+      
+        if (sb.length() > 0) {
+            sb.setLength(sb.length() - 1);
+            crossNodes = sb.toString();
+        } else {
+            crossNodes = "";
+        }
     }
-}
 
+ 
+    public String getCrossNodes() {
+        return crossNodes;
+    }
 
     public void crossover(GPTree other, Random rand) {
         List<Node> mine = new ArrayList<>();
@@ -81,7 +83,6 @@ public void traverse() {
 
     private List<String> collectBinopsFromString(String s) {
         List<String> out = new ArrayList<>();
-       
         List<Integer> stack = new ArrayList<>();
         for (int i = 0; i < s.length(); i++) {
             char ch = s.charAt(i);
@@ -100,9 +101,7 @@ public void traverse() {
         return out;
     }
 
- 
     private boolean isTopLevelBinop(String parened) {
-      
         if (parened.length() < 3 || parened.charAt(0) != '(' || parened.charAt(parened.length() - 1) != ')') {
             return false;
         }
@@ -112,10 +111,9 @@ public void traverse() {
             char c = parened.charAt(i);
             if (c == '(') depth++;
             else if (c == ')') depth--;
-            else if (depth == 1) { 
+            else if (depth == 1) {
                 if (c == '+' || c == '-' || c == '*' || c == '/') {
                     topOps++;
-                   
                     if (topOps > 1) return false;
                 }
             }
@@ -123,5 +121,4 @@ public void traverse() {
         return topOps == 1;
     }
 }
-
 
