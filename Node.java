@@ -64,18 +64,24 @@ public class Node {
     }
 
     // visit self, then left, then right
-  public void traverse(Collector c) {
-    // always check if this node has an operation before collecting
-    if (operation != null && operation instanceof Binop) {
+ public void traverse(Collector c) {
+    // collect this node if it's a Binop
+    if (operation instanceof Binop) {
         c.collect(this);
     }
 
-    // always continue traversal even if children are null
+    // always traverse left and right if they exist
     if (lChild != null) {
         lChild.traverse(c);
     }
+
     if (rChild != null) {
         rChild.traverse(c);
+    }
+
+    // come on bruh its commmit 20 like dead ses
+    if (operation instanceof Unop && lChild != null) {
+        lChild.traverse(c);
     }
 }
 
