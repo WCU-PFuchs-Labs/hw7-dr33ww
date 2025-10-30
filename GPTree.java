@@ -3,63 +3,59 @@ import java.util.List;
 import java.util.Random;
 
 public class GPTree {
-    private Node root;
     private final NodeFactory factory;
-    private final StringBuilder crossNodes = new StringBuilder();
+    private final Random rand;
+    private Node root;
 
-    public GPTree(NodeFactory factory) {
-        this.factory = factory;
-    }
-
-   
     public GPTree(NodeFactory factory, int maxDepth, Random rand) {
         this.factory = factory;
-        growRandom(maxDepth, rand);
-    }
+        this.rand = rand;
 
-    public void growRandom(int maxDepth, Random rand) {
-        root = factory.getOperator(rand);
-        if (root != null) {
-            root.addRandomKids(factory, maxDepth, rand);
-        }
+        this.root = factory.getOperator(rand);
+     
+        int depth = Math.max(1, maxDepth);
+        root.addRandomKids(factory, depth, rand);
     }
 
     public double eval(double[] data) {
         return (root == null) ? 0.0 : root.eval(data);
     }
 
-    public Node getRoot() { return root; }
+    public String toString() {
+        return (root == null) ? "<empty>" : root.toString();
+    }
+
+    public void traverse(Collector c) {
+        if (root != null) root.traverse(c);
+    }
 
     
-    public void traverse() {
-        crossNodes.setLength(0);
-        if (root != null) {
-            Collector c = new Collector() {
-                public void collect(Node n) {
-                    crossNodes.append(n.toString()).append("\n");
-                }
-            };
-            root.collect(c);
-        }
+    public List<String> collectBinopStrings() {
+        final List<String> out = new ArrayList<>();
+        traverse(new Collector() {
+            public void collect(Node n) {
+                out.add(n.asPlaceholder());
+            }
+        });
+        return out;
     }
 
-    public String getCrossNodes() {
-        return crossNodes.toString();
-    }
 
     public void crossover(GPTree other, Random rand) {
-        if (root == null || other.root == null) return;
+        List<Node> mine = new ArrayList<>();
+        List<Node> theirs = new ArrayList<>();
+        collectAllNodes(this.root, mine);
+        collectAllNodes(other.root, theirs);
+        if (mine.isEmpty() || theirs.isEmpty()) return;
+        Node a = mine.get(rand.nextInt(mine.size()));
+        Node b = theirs.get(rand.nextInt(theirs.size()));
+        swapChildren(a, b);
+    }
 
-        List<Node> a = new ArrayList<>();
-        List<Node> b = new ArrayList<>();
-        collectAllNodes(root, a);
-        collectAllNodes(other.root, b);
-
-        if (a.isEmpty() || b.isEmpty()) return;
-
-        Node aPick = a.get(rand.nextInt(a.size()));
-        Node bPick = b.get(rand.nextInt(b.size()));
-        aPick.swapWith(bPick);
+    private void swapChildren(Node a, Node b) {
+        Node aL = a.getLeft(), aR = a.getRight();
+        a.setLeft(b.getLeft()); a.setRight(b.getRight());
+        b.setLeft(aL);          b.setRight(aR);
     }
 
     private void collectAllNodes(Node n, List<Node> out) {
@@ -68,9 +64,4 @@ public class GPTree {
         collectAllNodes(n.getLeft(), out);
         collectAllNodes(n.getRight(), out);
     }
-
-    public String toString() {
-        return (root == null) ? "" : root.toString();
-    }
 }
-
