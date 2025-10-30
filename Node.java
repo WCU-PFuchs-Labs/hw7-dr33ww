@@ -42,8 +42,8 @@ public class Node {
             double b = rChild.eval(data);
             return ((Binop) operation).eval(a, b);
         } else if (operation instanceof Unop) {
-            double a = lChild.eval(data);
-            return ((Unop) operation).eval(a);
+            // fix: let Unop evaluate using the data array (it handles its child internally)
+            return ((Unop) operation).eval(data);
         } else if (operation instanceof Const) {
             return ((Const) operation).eval(data);
         } else if (operation instanceof Variable) {
