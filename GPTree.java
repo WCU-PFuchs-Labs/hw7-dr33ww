@@ -38,7 +38,7 @@ public class GPTree {
         if (binops.isEmpty()) {
             crossNodes = "";
         } else {
-            crossNodes = String.join(";", binops);  
+            crossNodes = String.join(";", binops);
         }
     }
 
@@ -73,9 +73,14 @@ public class GPTree {
     private List<String> collectBinopsFromString(String s) {
         List<String> out = new ArrayList<>();
         
+
+        if (s.equals("?")) {
+            return out;
+        }
+        
         for (int i = 0; i < s.length(); i++) {
             if (s.charAt(i) == '(') {
-              
+                
                 int depth = 1;
                 int j = i + 1;
                 while (j < s.length() && depth > 0) {
@@ -85,7 +90,7 @@ public class GPTree {
                 }
                 
                 if (depth == 0) {
-                 
+                   
                     String sub = s.substring(i, j);
                     if (isTopLevelBinop(sub)) {
                         out.add(sub);
@@ -98,15 +103,15 @@ public class GPTree {
     }
 
     private boolean isTopLevelBinop(String parened) {
-     
+      
         if (parened.length() < 3 || parened.charAt(0) != '(' || parened.charAt(parened.length() - 1) != ')') {
             return false;
         }
         
-    
+       
         String content = parened.substring(1, parened.length() - 1);
         
-   
+        
         int depth = 0;
         int operatorCount = 0;
         
