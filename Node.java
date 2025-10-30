@@ -1,4 +1,3 @@
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Random;
 
@@ -12,24 +11,17 @@ public class Node {
         this.operation = op;
     }
 
-    public Object getOperation() {
-        return operation;
-    }
-
-    public Node getLeft() {
-        return lChild;
-    }
-
-    public Node getRight() {
-        return rChild;
-    }
+    public Object getOperation() { return operation; }
+    public Node getLeft() { return lChild; }
+    public Node getRight() { return rChild; }
+    public void setLeft(Node n) { this.lChild = n; }
+    public void setRight(Node n) { this.rChild = n; }
+    public void setOperation(Object op) { this.operation = op; }
 
     public boolean isLeaf() {
-       
         return !(operation instanceof Binop) && !(operation instanceof Unop);
     }
 
-   
     public void addRandomKids(NodeFactory factory, int maxDepth, Random rand) {
         if (maxDepth <= 0) return;
 
@@ -41,94 +33,86 @@ public class Node {
         } else if (operation instanceof Unop) {
             lChild = factory.getOperator(rand);
             if (lChild != null) lChild.addRandomKids(factory, maxDepth - 1, rand);
-        } else {
-   
-        }
+        } // leaves: nothing to add
     }
 
- 
     public double eval(double[] data) {
-     
         if (operation instanceof Binop) {
-            if (lChild == null || rChild == null) {
+            if (lChild == null || rChild == null)
                 throw new NullPointerException("Binop node missing child(ren)");
-            }
-            double left = lChild.eval(data);
-            double right = rChild.eval(data);
-            return ((Binop) operation).eval(left, right);
+            double a = lChild.eval(data);
+            double b = rChild.eval(data);
+            return ((Binop) operation).eval(a, b);
         }
 
-     
         if (operation instanceof Unop) {
-            if (lChild == null) {
-                throw new NullPointerException("Unop node missing left child");
-            }
+            if (lChild == null)
+                throw new NullPointerException("Unop node missing child");
             double v = lChild.eval(data);
-            return ((Unop) operation).eval(v);
-        }
 
-        Object op = operation;
-
-
-        if (op instanceof Variable) {
+            // Try Unop.eval(double)
             try {
-                return ((Variable) op).eval(data);
-            } catch (Throwable t) {
-               
-            }
-        }
-
-        
-        if (op instanceof Const) {
-        
-            try {
-                Method m = op.getClass().getMethod("eval");
-                Object out = m.invoke(op);
-                if (out instanceof Number) return ((Number) out).doubleValue();
+                Method m = operation.getClass().getMethod("eval", double.class);
+                Object out = m.invoke(operation, v);
+                return ((Number) out).doubleValue();
             } catch (Throwable ignore) {}
 
-            // Try getValue()/getVal()
+          
             try {
-                Method m = op.getClass().getMethod("getValue");
-                Object out = m.invoke(op);
-                if (out instanceof Number) return ((Number) out).doubleValue();
+                Method m = operation.getClass().getMethod("eval", double[].class);
+                Object out = m.invoke(operation, (Object) new double[]{v});
+                return ((Number) out).doubleValue();
             } catch (Throwable ignore) {}
 
-            try {
-                Method m = op.getClass().getMethod("getVal");
-                Object out = m.invoke(op);
-                if (out instanceof Number) return ((Number) out).doubleValue();
-            } catch (Throwable ignore) {}
-
-        
-            try {
-                for (Field f : op.getClass().getDeclaredFields()) {
-                    if (f.getType() == double.class) {
-                        f.setAccessible(true);
-                        return f.getDouble(op);
-                    }
-                }
-            } catch (Throwable ignore) {}
+            throw new IllegalStateException("Unop has no compatible eval(double) or eval(double[])");
         }
 
        
         try {
-            Method m = op.getClass().getMethod("eval", double[].class);
-            Object out = m.invoke(op, (Object) data);
-            if (out instanceof Number) return ((Number) out).doubleValue();
+            
+            Method m = operation.getClass().getMethod("eval", double[].class);
+            Object out = m.invoke(operation, (Object) data);
+            return ((Number) out).doubleValue();
         } catch (Throwable ignore) {}
 
-       
         try {
-            Method m = op.getClass().getMethod("eval");
-            Object out = m.invoke(op);
-            if (out instanceof Number) return ((Number) out).doubleValue();
+           
+            Method m = operation.getClass().getMethod("eval");
+            Object out = m.invoke(operation);
+            return ((Number) out).doubleValue();
         } catch (Throwable ignore) {}
 
-        throw new IllegalStateException("Cannot evaluate leaf operation of type: " + op.getClass().getName());
+        try {
+            
+            Method m = operation.getClass().getMethod("getValue");
+            Object out = m.invoke(operation);
+            return ((Number) out).doubleValue();
+        } catch (Throwable ignore) {}
+
+        try {
+            
+            Method m = operation.getClass().getMethod("getVal");
+            Object out = m.invoke(operation);
+            return ((Number) out).doubleValue();
+        } catch (Throwable ignore) {}
+
+        throw new IllegalStateException("Cannot evaluate leaf operation of type: " + operation.getClass().getName());
     }
 
- 
+    public void swapWith(Node other) {
+        Object tmpOp = other.operation;
+        Node tmpL = other.lChild;
+        Node tmpR = other.rChild;
+
+        other.operation = this.operation;
+        other.lChild = this.lChild;
+        other.rChild = this.rChild;
+
+        this.operation = tmpOp;
+        this.lChild = tmpL;
+        this.rChild = tmpR;
+    }
+
     public String toString() {
         if (operation instanceof Binop) {
             return "(" + lChild + " " + operation + " " + rChild + ")";
