@@ -23,7 +23,7 @@ public class GPTree {
     }
 
     public String toString() {
-        return (root == null) ? "<empty>" : root.toString();
+        return (root == null) ? "" : root.toString();
     }
 
     
