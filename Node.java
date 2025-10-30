@@ -9,26 +9,27 @@ public class Node {
         this.operation = operation;
     }
 
-    
     public Node getLeft() { return lChild; }
     public Node getRight() { return rChild; }
     public Op getOperation() { return operation; }
-
 
     public double eval(double[] data) {
         if (operation instanceof Binop) {
             double a = lChild.eval(data);
             double b = rChild.eval(data);
-            return ((Binop) operation).eval(a, b); 
+            return ((Binop) operation).eval(a, b);
         } else if (operation instanceof Unop) {
             double v = lChild.eval(data);
-            return ((Unop) operation).eval(v); 
+            return ((Unop) operation).eval(new double[]{v}); 
+        } else if (operation instanceof Const) {
+            return ((Const) operation).eval(data); 
+        } else if (operation instanceof Variable) {
+            return ((Variable) operation).eval(data); 
         } else {
-            return operation.eval(data); 
+            throw new IllegalStateException("Unknown operation type: " + operation.getClass().getName());
         }
     }
 
-   
     public void addRandomKids(NodeFactory factory, int maxDepth, Random rand) {
         if (maxDepth <= 0) return;
 
@@ -43,7 +44,6 @@ public class Node {
         }
     }
 
-    
     public void swapWith(Node other) {
         Op tmpOp = this.operation;
         Node tmpL = this.lChild;
@@ -58,7 +58,6 @@ public class Node {
         other.rChild = tmpR;
     }
 
-   
     public void collect(Collector c) {
         if (operation instanceof Binop) {
             c.collect(this);
@@ -67,7 +66,6 @@ public class Node {
         if (rChild != null) rChild.collect(c);
     }
 
-    
     public String toString() {
         if (operation instanceof Binop) {
             String leftS = (lChild == null) ? "?" : lChild.toString();
