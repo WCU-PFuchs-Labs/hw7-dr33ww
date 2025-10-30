@@ -9,7 +9,7 @@ public class Node {
         this.operation = op;
     }
 
- 
+    
     public Node getLeft()  { return lChild; }
     public Node getRight() { return rChild; }
     public Op getOperation() { return operation; }
@@ -43,30 +43,30 @@ public class Node {
         if (maxDepth <= 0) return;
 
         if (operation instanceof Binop) {
-            // both children
-            if (lChild == null) lChild = new Node(factory.getOperator(rand));
-            if (rChild == null) rChild = new Node(factory.getOperator(rand));
+            // both children (factory returns Node already)
+            if (lChild == null) lChild = factory.getOperator(rand);
+            if (rChild == null) rChild = factory.getOperator(rand);
             lChild.addRandomKids(factory, maxDepth - 1, rand);
             rChild.addRandomKids(factory, maxDepth - 1, rand);
         } else if (operation instanceof Unop) {
             // unary gets a single left child
-            if (lChild == null) lChild = new Node(factory.getOperator(rand));
+            if (lChild == null) lChild = factory.getOperator(rand);
             lChild.addRandomKids(factory, maxDepth - 1, rand);
         } else {
-            // terminal node - no children
+            
         }
     }
 
     // traverse and let collector see binops
     public void traverse(Collector c) {
         if (operation instanceof Binop) {
-            c.collect(this); 
+            c.collect(this); // Collector can inspect this node
         }
         if (lChild != null) lChild.traverse(c);
         if (rChild != null) rChild.traverse(c);
     }
 
-    // Swap entire subtrees with another node
+    // swap entire subtrees with another node
     public void swapWith(Node other) {
         Op opTmp = this.operation;
         Node lTmp = this.lChild;
