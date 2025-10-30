@@ -19,7 +19,7 @@ public class TestGPTree {
 
         gpt1.crossover(gpt2, rand);
 
-        System.out.println("after crossover");
+        System.out.println("After crossover");
         System.out.println(gpt1 + " = " + gpt1.eval(data));
         System.out.println(gpt2 + " = " + gpt2.eval(data));
     }
