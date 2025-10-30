@@ -38,7 +38,7 @@ public class GPTree {
         if (binops.isEmpty()) {
             crossNodes = "";
         } else {
-            crossNodes = String.join("\n", binops);
+            crossNodes = String.join(";", binops);  
         }
     }
 
@@ -85,7 +85,7 @@ public class GPTree {
                 }
                 
                 if (depth == 0) {
-                    // Found matching parentheses
+                 
                     String sub = s.substring(i, j);
                     if (isTopLevelBinop(sub)) {
                         out.add(sub);
@@ -98,7 +98,7 @@ public class GPTree {
     }
 
     private boolean isTopLevelBinop(String parened) {
-   
+     
         if (parened.length() < 3 || parened.charAt(0) != '(' || parened.charAt(parened.length() - 1) != ')') {
             return false;
         }
@@ -106,7 +106,7 @@ public class GPTree {
     
         String content = parened.substring(1, parened.length() - 1);
         
-        
+   
         int depth = 0;
         int operatorCount = 0;
         
