@@ -7,12 +7,13 @@ public class GPTree {
     private final Random rand;
     private Node root;
 
+    
+    private String crossNodes = "";
+
     public GPTree(NodeFactory factory, int maxDepth, Random rand) {
         this.factory = factory;
         this.rand = rand;
-
         this.root = factory.getOperator(rand);
-     
         int depth = Math.max(1, maxDepth);
         root.addRandomKids(factory, depth, rand);
     }
@@ -25,22 +26,25 @@ public class GPTree {
         return (root == null) ? "<empty>" : root.toString();
     }
 
-    public void traverse(Collector c) {
-        if (root != null) root.traverse(c);
+    
+    public void traverse() {
+        final StringBuilder sb = new StringBuilder();
+        if (root != null) {
+            root.traverse(new Collector() {
+                public void collect(Node n) {
+                    sb.append(n.asPlaceholder()).append("\n");
+                }
+            });
+        }
+        crossNodes = sb.toString();
     }
 
     
-    public List<String> collectBinopStrings() {
-        final List<String> out = new ArrayList<>();
-        traverse(new Collector() {
-            public void collect(Node n) {
-                out.add(n.asPlaceholder());
-            }
-        });
-        return out;
+    public String getCrossNodes() {
+        return crossNodes;
     }
 
-
+  
     public void crossover(GPTree other, Random rand) {
         List<Node> mine = new ArrayList<>();
         List<Node> theirs = new ArrayList<>();
