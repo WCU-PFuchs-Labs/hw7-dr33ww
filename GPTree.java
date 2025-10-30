@@ -91,22 +91,30 @@ public class GPTree {
     }
 
     private boolean isTopLevelBinop(String parened) {
+    
         if (parened.length() < 3 || parened.charAt(0) != '(' || parened.charAt(parened.length() - 1) != ')') {
             return false;
         }
+        
+       
+        String content = parened.substring(1, parened.length() - 1);
+        
+    
         int depth = 0;
-        int topOps = 0;
-        for (int i = 0; i < parened.length(); i++) {
-            char c = parened.charAt(i);
+        int operatorCount = 0;
+        
+        for (int i = 0; i < content.length(); i++) {
+            char c = content.charAt(i);
             if (c == '(') depth++;
             else if (c == ')') depth--;
-            else if (depth == 1) {
+            else if (depth == 0) {
                 if (c == '+' || c == '-' || c == '*' || c == '/') {
-                    topOps++;
-                    if (topOps > 1) return false;
+                    operatorCount++;
+                    if (operatorCount > 1) return false; 
                 }
             }
         }
-        return topOps == 1;
+        
+        return operatorCount == 1; 
     }
 }
