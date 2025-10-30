@@ -74,11 +74,13 @@ public class Node {
    
 
     //  visit self, then left, then right
-    public void traverse(Collector c) {
-        c.collect(this);
-        if (this.lChild != null) this.lChild.traverse(c);
-        if (this.rChild != null) this.rChild.traverse(c);
+  public void traverse(Collector c) {
+    if (operation instanceof Binop) {
+        c.collect(this); // only collect binops
     }
+    if (lChild != null) lChild.traverse(c);
+    if (rChild != null) rChild.traverse(c);
+}
 
     // true if no children
     public boolean isLeaf() {
