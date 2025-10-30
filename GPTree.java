@@ -72,34 +72,41 @@ public class GPTree {
 
     private List<String> collectBinopsFromString(String s) {
         List<String> out = new ArrayList<>();
-        List<Integer> stack = new ArrayList<>();
+        
         for (int i = 0; i < s.length(); i++) {
-            char ch = s.charAt(i);
-            if (ch == '(') {
-                stack.add(i);
-            } else if (ch == ')') {
-                if (!stack.isEmpty()) {
-                    int start = stack.remove(stack.size() - 1);
-                    String sub = s.substring(start, i + 1);
+            if (s.charAt(i) == '(') {
+              
+                int depth = 1;
+                int j = i + 1;
+                while (j < s.length() && depth > 0) {
+                    if (s.charAt(j) == '(') depth++;
+                    else if (s.charAt(j) == ')') depth--;
+                    j++;
+                }
+                
+                if (depth == 0) {
+                    // Found matching parentheses
+                    String sub = s.substring(i, j);
                     if (isTopLevelBinop(sub)) {
                         out.add(sub);
                     }
                 }
             }
         }
+        
         return out;
     }
 
     private boolean isTopLevelBinop(String parened) {
-    
+   
         if (parened.length() < 3 || parened.charAt(0) != '(' || parened.charAt(parened.length() - 1) != ')') {
             return false;
         }
         
-       
+    
         String content = parened.substring(1, parened.length() - 1);
         
-    
+        
         int depth = 0;
         int operatorCount = 0;
         
