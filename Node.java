@@ -81,7 +81,7 @@ public class Node {
 
     @Override
     public String toString() {
-        // Make Node.toString() return the placeholder form
+       
         return toPlaceholderString();
     }
 
@@ -100,6 +100,14 @@ public class Node {
     }
 
     public String asPlaceholder() {
-        return toPlaceholderString();
+        if (operation instanceof Binop) {
+            String sym = binopSymbol((Binop) operation);
+            return "(? " + sym + " ?)";
+        }
+        if (operation instanceof Const || operation instanceof Variable) {
+            return "?";
+        }
+        // For unary operations
+        return operation.toString() + "(?)";
     }
 }
