@@ -65,11 +65,18 @@ public class Node {
 
     // visit self, then left, then right
   public void traverse(Collector c) {
+    // always check if this node has an operation before collecting
     if (operation != null && operation instanceof Binop) {
         c.collect(this);
     }
-    if (lChild != null) lChild.traverse(c);
-    if (rChild != null) rChild.traverse(c);
+
+    // always continue traversal even if children are null
+    if (lChild != null) {
+        lChild.traverse(c);
+    }
+    if (rChild != null) {
+        rChild.traverse(c);
+    }
 }
 
     // true if no children
