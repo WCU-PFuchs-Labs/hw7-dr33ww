@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-//im on the very of edge of losing my mind i know wat a node is in its natural state, it speaks to me
+
 public class GPTree {
     private final NodeFactory factory;
     private final Random rand;
@@ -31,17 +31,14 @@ public class GPTree {
             crossNodes = "";
             return;
         }
-        String tree = root.toString();         
-        List<String> binops = collectBinopsFromString(tree);
+
+        String treeString = root.toString();
+        List<String> binops = collectBinopsFromString(treeString);
+        
         if (binops.isEmpty()) {
             crossNodes = "";
         } else {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < binops.size(); i++) {
-                if (i > 0) sb.append('\n');
-                sb.append(binops.get(i));
-            }
-            crossNodes = sb.toString();
+            crossNodes = String.join("\n", binops);
         }
     }
 
@@ -73,9 +70,6 @@ public class GPTree {
         collectAllNodes(n.getRight(), out);
     }
 
-
-
-
     private List<String> collectBinopsFromString(String s) {
         List<String> out = new ArrayList<>();
         List<Integer> stack = new ArrayList<>();
@@ -96,7 +90,6 @@ public class GPTree {
         return out;
     }
 
-  
     private boolean isTopLevelBinop(String parened) {
         if (parened.length() < 3 || parened.charAt(0) != '(' || parened.charAt(parened.length() - 1) != ')') {
             return false;
