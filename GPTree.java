@@ -28,15 +28,22 @@ public class GPTree {
     }
 
   
-    public void traverse() {
-        if (root == null) {
-            crossNodes = "";
-            return;
-        }
-        String placeholder = root.toString(); 
-        List<String> found = collectBinopsFromString(placeholder);
-        crossNodes = String.join("\n", found);
+   public void traverse() {
+    if (root == null) {
+        crossNodes = "";
+        return;
     }
+    final StringBuilder sb = new StringBuilder();
+    root.traverse(new Collector() {
+        @Override
+        public void collect(Node n) {
+          
+            if (sb.length() > 0) sb.append('\n'); 
+            sb.append(n.toString());
+        }
+    });
+    crossNodes = sb.toString();
+}
 
     public String getCrossNodes() {
         return crossNodes;
