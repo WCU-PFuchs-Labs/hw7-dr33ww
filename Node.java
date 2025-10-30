@@ -1,109 +1,107 @@
 import java.util.Random;
 
 public class Node {
-    Op operation;
-    Node lChild;
-    Node rChild;
+    private Op operation;
+    private Node lChild;
+    private Node rChild;
 
     public Node(Op op) {
         this.operation = op;
     }
 
-    
-    public Node getLeft()  { return lChild; }
-    public Node getRight() { return rChild; }
-    public Op getOperation() { return operation; }
-
-    public boolean isLeaf() {
-        return !(operation instanceof Binop);
+   
+    public Node(Node n) {
+        this.operation = n.operation;
+        this.lChild = n.lChild;
+        this.rChild = n.rChild;
     }
 
-    // evaluate the tree recursively
+   
+    public Op getOperation() { return operation; }
+    public Node getLeft()     { return lChild;    }
+    public Node getRight()    { return rChild;    }
+    public void setLeft(Node n)  { this.lChild = n; }
+    public void setRight(Node n) { this.rChild = n; }
+
+    
     public double eval(double[] data) {
         if (operation instanceof Binop) {
-            if (lChild == null || rChild == null) {
-                throw new NullPointerException("Binop node missing child(ren)");
-            }
-            double a = lChild.eval(data);
-            double b = rChild.eval(data);
-            return ((Binop) operation).eval(a, b);
+            double a = (lChild != null) ? lChild.eval(data) : 0.0;
+            double b = (rChild != null) ? rChild.eval(data) : 0.0;
+            return ((Binop) operation).eval(new double[]{ a, b });
         } else if (operation instanceof Unop) {
-            return ((Unop) operation).eval(data);
+            double v = (lChild != null) ? lChild.eval(data) : 0.0;
+            return ((Unop) operation).eval(new double[]{ v });
+        } else if (operation instanceof Const) {
+            return ((Const) operation).eval(new double[0]);
         } else if (operation instanceof Variable) {
             return ((Variable) operation).eval(data);
-        } else if (operation instanceof Const) {
-            return ((Const) operation).eval(data);
-        } else {
-            throw new IllegalStateException("Unknown operation type: " + operation.getClass());
         }
+       
+        return 0.0;
     }
 
-    // build random children where appropriate
+   
     public void addRandomKids(NodeFactory factory, int maxDepth, Random rand) {
         if (maxDepth <= 0) return;
 
         if (operation instanceof Binop) {
-            // both children (factory returns Node already)
             if (lChild == null) lChild = factory.getOperator(rand);
             if (rChild == null) rChild = factory.getOperator(rand);
-            lChild.addRandomKids(factory, maxDepth - 1, rand);
-            rChild.addRandomKids(factory, maxDepth - 1, rand);
+            if (lChild != null) lChild.addRandomKids(factory, maxDepth - 1, rand);
+            if (rChild != null) rChild.addRandomKids(factory, maxDepth - 1, rand);
         } else if (operation instanceof Unop) {
-            // unary gets a single left child
             if (lChild == null) lChild = factory.getOperator(rand);
-            lChild.addRandomKids(factory, maxDepth - 1, rand);
+            if (lChild != null) lChild.addRandomKids(factory, maxDepth - 1, rand);
         } else {
-            
+          
         }
     }
 
-    // traverse and let collector see binops
-    public void traverse(Collector c) {
+ 
+    public void collect(Collector c) {
         if (operation instanceof Binop) {
-            c.collect(this); // Collector can inspect this node
+            c.collect(this);
         }
-        if (lChild != null) lChild.traverse(c);
-        if (rChild != null) rChild.traverse(c);
+        if (lChild != null) lChild.collect(c);
+        if (rChild != null) rChild.collect(c);
     }
 
-    // swap entire subtrees with another node
+ 
+    public String toString() {
+        if (operation instanceof Binop) {
+            String leftS  = (lChild != null ? lChild.toString() : "null");
+            String rightS = (rChild != null ? rChild.toString() : "null");
+            return ((Binop) operation).toString(leftS, rightS);
+        } else if (operation instanceof Unop) {
+            String arg = (lChild != null ? lChild.toString() : "null");
+            
+            return operation.toString() + "(" + arg + ")";
+        } else {
+            return operation.toString();
+        }
+    }
+
+    public Node deepCopy() {
+        Node n = new Node(operation);
+        if (lChild != null) n.lChild = lChild.deepCopy();
+        if (rChild != null) n.rChild = rChild.deepCopy();
+        return n;
+    }
+
+    
     public void swapWith(Node other) {
-        Op opTmp = this.operation;
-        Node lTmp = this.lChild;
-        Node rTmp = this.rChild;
+        Op tmpOp = this.operation;
+        Node tmpL = this.lChild;
+        Node tmpR = this.rChild;
 
         this.operation = other.operation;
         this.lChild = other.lChild;
         this.rChild = other.rChild;
 
-        other.operation = opTmp;
-        other.lChild = lTmp;
-        other.rChild = rTmp;
-    }
-
-    // readable infix
-    public String toString() {
-        if (operation instanceof Binop) {
-            String left = (lChild != null) ? lChild.toString() : "?";
-            String right = (rChild != null) ? rChild.toString() : "?";
-            return "(" + left + " " + operation.toString() + " " + right + ")";
-        } else if (operation instanceof Unop) {
-            String inner = (lChild != null) ? lChild.toString() : "?";
-            return operation.toString() + "(" + inner + ")";
-        } else {
-            // const or variable prints via its own toString
-            return operation.toString();
-        }
-    }
-
-    // pattern string used by collector tests for binops
-    public String patternString() {
-        if (operation instanceof Binop) {
-            String left = (lChild != null) ? lChild.patternString() : "?";
-            String right = (rChild != null) ? rChild.patternString() : "?";
-            return "(" + left + " " + operation.toString() + " " + right + ")";
-        } else {
-            return "?";
-        }
+        other.operation = tmpOp;
+        other.lChild = tmpL;
+        other.rChild = tmpR;
     }
 }
+
