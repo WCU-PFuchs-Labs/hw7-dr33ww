@@ -1,4 +1,3 @@
-/ node class for algebraic trees
 
 public class Node {
     Op op;
