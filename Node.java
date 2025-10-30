@@ -1,6 +1,5 @@
 import java.util.Random;
 
-
 public class Node {
     private Op operation;
     private Node lChild;
@@ -16,7 +15,6 @@ public class Node {
     public void setLeft(Node n) { lChild = n; }
     public void setRight(Node n) { rChild = n; }
 
- 
     public double eval(double[] data) {
         if (operation instanceof Binop) {
             double a = (lChild != null) ? lChild.eval(data) : 0.0;
@@ -26,11 +24,9 @@ public class Node {
         if (operation instanceof Const || operation instanceof Variable) {
             return ((Unop) operation).eval(data);
         }
-  
         double v = (lChild != null) ? lChild.eval(data) : 0.0;
         return ((Unop) operation).eval(new double[]{ v });
     }
-
 
     public void addRandomKids(NodeFactory factory, int depth, Random rand) {
         if (depth < 0) depth = 0;
@@ -50,10 +46,9 @@ public class Node {
         }
 
         if (operation instanceof Const || operation instanceof Variable) {
-            return; 
+            return;
         }
 
-    
         if (lChild == null) {
             lChild = (depth <= 1) ? makeTerminal(factory, rand) : factory.getOperator(rand);
         }
@@ -63,12 +58,11 @@ public class Node {
     }
 
     private Node makeTerminal(NodeFactory factory, Random rand) {
-   
         for (int i = 0; i < 32; i++) {
             Node n = factory.getOperator(rand);
             if (n.operation instanceof Const || n.operation instanceof Variable) return n;
         }
-        return new Node(new Const(0.0)); 
+        return new Node(new Const(0.0));
     }
 
     private String toPlaceholderString() {
@@ -84,17 +78,11 @@ public class Node {
         String inner = (lChild == null) ? "?" : lChild.toPlaceholderString();
         return operation.toString() + "(" + inner + ")";
     }
-@Override
- public String toString() {
-   
-    return toPlaceholderString();
-   
-}
-        if (operation instanceof Const || operation instanceof Variable) {
-            return operation.toString();
-        }
-        String inner = (lChild == null) ? "null" : lChild.toString();
-        return operation.toString() + "(" + inner + ")";
+
+    @Override
+    public String toString() {
+        // Make Node.toString() return the placeholder form
+        return toPlaceholderString();
     }
 
     private String binopSymbol(Binop bop) {
@@ -105,13 +93,11 @@ public class Node {
         return "?";
     }
 
-
     public void traverse(Collector c) {
         if (operation instanceof Binop) c.collect(this);
         if (lChild != null) lChild.traverse(c);
         if (rChild != null) rChild.traverse(c);
     }
-
 
     public String asPlaceholder() {
         return toPlaceholderString();
