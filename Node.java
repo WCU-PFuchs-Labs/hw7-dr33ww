@@ -1,102 +1,90 @@
 import java.util.Random;
 
-
 public class Node {
-    private Op operation;
+    private final Op operation;
     private Node lChild;
     private Node rChild;
 
-    public Node(Op operation) {
-        this.operation = operation;
+ 
+    public Node(Op op) {
+        this.operation = op;
+    }
+
+    public Node(Op op, Node left) {
+        this.operation = op;
+        this.lChild = left;
+    }
+
+    public Node(Op op, Node left, Node right) {
+        this.operation = op;
+        this.lChild = left;
+        this.rChild = right;
     }
 
     public Op getOperation() { return operation; }
-    public Node getLeft() { return lChild; }
-    public Node getRight() { return rChild; }
-    public void setLeft(Node n) { lChild = n; }
-    public void setRight(Node n) { rChild = n; }
+    public Node getLeft()     { return lChild; }
+    public Node getRight()    { return rChild; }
+    public void setLeft(Node n)  { this.lChild = n; }
+    public void setRight(Node n) { this.rChild = n; }
 
-  
+
     public double eval(double[] data) {
+        if (operation instanceof Const) {
+            return ((Const) operation).eval(data);
+        }
+        if (operation instanceof Variable) {
+            return ((Variable) operation).eval(data);
+        }
+        if (operation instanceof Unop) {
+            double v = (lChild == null ? 0.0 : lChild.eval(data));
+            return ((Unop) operation).eval(v);
+        }
         if (operation instanceof Binop) {
-            double a = (lChild != null) ? lChild.eval(data) : 0.0;
-            double b = (rChild != null) ? rChild.eval(data) : 0.0;
+            double a = (lChild == null ? 0.0 : lChild.eval(data));
+            double b = (rChild == null ? 0.0 : rChild.eval(data));
             return ((Binop) operation).eval(a, b);
         }
-        if (operation instanceof Const || operation instanceof Variable) {
-            return ((Unop) operation).eval(data);
-        }
-        double v = (lChild != null) ? lChild.eval(data) : 0.0;
-        return ((Unop) operation).eval(new double[]{ v });
+ 
+        return 0.0;
     }
 
-   
-    public void addRandomKids(NodeFactory factory, int depth, Random rand) {
-        if (depth < 0) depth = 0;
 
+
+ 
+    @Override
+    public String toString() {
+        return toPlaceholderString();
+    }
+
+    public String toConcreteString() {
         if (operation instanceof Binop) {
-            if (lChild == null) {
-                lChild = (depth <= 1) ? makeTerminal(factory, rand) : factory.getOperator(rand);
-            }
-            if (rChild == null) {
-                rChild = (depth <= 1) ? makeTerminal(factory, rand) : factory.getOperator(rand);
-            }
-            if (depth > 1) {
-                lChild.addRandomKids(factory, depth - 1, rand);
-                rChild.addRandomKids(factory, depth - 1, rand);
-            }
-            return;
-        }
-
-        if (operation instanceof Const || operation instanceof Variable) {
-            return;
-        }
-
-     
-        if (lChild == null) {
-            lChild = (depth <= 1) ? makeTerminal(factory, rand) : factory.getOperator(rand);
-        }
-        if (depth > 1) {
-            lChild.addRandomKids(factory, depth - 1, rand);
+            String leftS = (lChild == null) ? "null" : lChild.toConcreteString();
+            String rightS = (rChild == null) ? "null" : rChild.toConcreteString();
+            String sym = binopSymbol((Binop) operation);
+            return "(" + leftS + " " + sym + " " + rightS + ")";
+        } else if (operation instanceof Unop) {
+            String inner = (lChild == null) ? "null" : lChild.toConcreteString();
+            return operation.toString() + "(" + inner + ")";
+        } else {
+          
+            return operation.toString();
         }
     }
 
-    private Node makeTerminal(NodeFactory factory, Random rand) {
-       
-        for (int i = 0; i < 32; i++) {
-            Node n = factory.getOperator(rand);
-            if (n.operation instanceof Const || n.operation instanceof Variable) return n;
-        }
-        return new Node(new Const(0.0)); 
-    }
 
-    
-    private String toPlaceholderString() {
+    public String toPlaceholderString() {
         if (operation instanceof Binop) {
             String leftS = (lChild == null) ? "?" : lChild.toPlaceholderString();
             String rightS = (rChild == null) ? "?" : rChild.toPlaceholderString();
             String sym = binopSymbol((Binop) operation);
             return "(" + leftS + " " + sym + " " + rightS + ")";
-        }
-        if (operation instanceof Const || operation instanceof Variable) {
-            return "?";
-        }
-        String inner = (lChild == null) ? "?" : lChild.toPlaceholderString();
-        return operation.toString() + "(" + inner + ")";
-    }
-
-    public String toString() {
-        if (operation instanceof Binop) {
-            String leftS = (lChild == null) ? "null" : lChild.toString();
-            String rightS = (rChild == null) ? "null" : rChild.toString();
-            String sym = binopSymbol((Binop) operation);
-            return "(" + leftS + " " + sym + " " + rightS + ")";
-        }
-        if (operation instanceof Const || operation instanceof Variable) {
+        } else if (operation instanceof Unop) {
+            String inner = (lChild == null) ? "?" : lChild.toPlaceholderString();
+            return operation.toString() + "(" + inner + ")";
+        } else {
+         
             return operation.toString();
         }
-        String inner = (lChild == null) ? "null" : lChild.toString();
-        return operation.toString() + "(" + inner + ")";
     }
 
     private String binopSymbol(Binop bop) {
@@ -107,14 +95,23 @@ public class Node {
         return "?";
     }
 
-    
-    public void traverse(Collector c) {
-        if (operation instanceof Binop) c.collect(this);
-        if (lChild != null) lChild.traverse(c);
-        if (rChild != null) rChild.traverse(c);
+
+    public void growIfNeeded(NodeFactory factory, int maxDepth, Random rand) {
+        if (!(operation instanceof Binop)) {
+            if (operation instanceof Unop && lChild == null && maxDepth > 0) {
+                lChild = factory.randomNode(maxDepth - 1, rand);
+            }
+            return;
+        }
+  
+        if (lChild == null && maxDepth > 0) lChild = factory.randomNode(maxDepth - 1, rand);
+        if (rChild == null && maxDepth > 0) rChild = factory.randomNode(maxDepth - 1, rand);
     }
 
-    public String asPlaceholder() {
-        return toPlaceholderString();
+
+    public void collect(Collector c) {
+        c.collect(this);
+        if (lChild != null) lChild.collect(c);
+        if (rChild != null) rChild.collect(c);
     }
 }
