@@ -1,12 +1,13 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
+//im on the very of edge of losing my mind i know wat a node is in its natural state, it speaks to me
 public class GPTree {
     private final NodeFactory factory;
     private final Random rand;
     private Node root;
 
+    
     private String crossNodes = "";
 
     public GPTree(NodeFactory factory, int maxDepth, Random rand) {
@@ -21,23 +22,20 @@ public class GPTree {
         return (root == null) ? 0.0 : root.eval(data);
     }
 
+    @Override
     public String toString() {
         return (root == null) ? "" : root.toString();
     }
 
-
+  
     public void traverse() {
         if (root == null) {
             crossNodes = "";
             return;
         }
-        final List<String> lines = new ArrayList<>();
-        root.traverse(new Collector() {
-            public void collect(Node n) {
-                lines.add(n.asPlaceholder());
-            }
-        });
-        crossNodes = String.join("\n", lines);
+        String placeholder = root.toString(); 
+        List<String> found = collectBinopsFromString(placeholder);
+        crossNodes = String.join("\n", found);
     }
 
     public String getCrossNodes() {
@@ -66,6 +64,51 @@ public class GPTree {
         out.add(n);
         collectAllNodes(n.getLeft(), out);
         collectAllNodes(n.getRight(), out);
+    }
+
+
+    private List<String> collectBinopsFromString(String s) {
+        List<String> out = new ArrayList<>();
+       
+        List<Integer> stack = new ArrayList<>();
+        for (int i = 0; i < s.length(); i++) {
+            char ch = s.charAt(i);
+            if (ch == '(') {
+                stack.add(i);
+            } else if (ch == ')') {
+                if (!stack.isEmpty()) {
+                    int start = stack.remove(stack.size() - 1);
+                    String sub = s.substring(start, i + 1);
+                    if (isTopLevelBinop(sub)) {
+                        out.add(sub);
+                    }
+                }
+            }
+        }
+        return out;
+    }
+
+ 
+    private boolean isTopLevelBinop(String parened) {
+      
+        if (parened.length() < 3 || parened.charAt(0) != '(' || parened.charAt(parened.length() - 1) != ')') {
+            return false;
+        }
+        int depth = 0;
+        int topOps = 0;
+        for (int i = 0; i < parened.length(); i++) {
+            char c = parened.charAt(i);
+            if (c == '(') depth++;
+            else if (c == ')') depth--;
+            else if (depth == 1) { 
+                if (c == '+' || c == '-' || c == '*' || c == '/') {
+                    topOps++;
+                   
+                    if (topOps > 1) return false;
+                }
+            }
+        }
+        return topOps == 1;
     }
 }
 
