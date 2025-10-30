@@ -1,10 +1,12 @@
 
+
+
 public class Node {
     Op op;
     Node lChild;
     Node rChild;
 
-    // constructor
+    
     public Node(Op o) {
         op = o;
         lChild = null;
@@ -16,15 +18,19 @@ public class Node {
         op.addRandomKids(this, n, maxDepth, rand);
     }
 
-    // evaluate this node on given data
+    // eval node given data
     public double eval(double[] data) {
+       
         return op.eval(this, data);
     }
 
-    // convert this node into a readable string
+    // turn node into readable str
     public String toString() {
+        
         return op.toString(this);
     }
+
+
 
    
     public void traverse(Collector c) {
@@ -33,22 +39,24 @@ public class Node {
         if (this.rChild != null) this.rChild.traverse(c);
     }
 
-    // leaf check: true if this node has no children
+    // true if node has no children, who is gohan
     public boolean isLeaf() {
         return this.lChild == null && this.rChild == null;
     }
 
-    // swap this node's left child with trunk's left child , i want to call node gohan
+    // swap this node's left child with trunk's left child, what did they do to u gohan
     public void swapLeft(Node trunk) {
         Node temp = this.lChild;
         this.lChild = trunk.lChild;
         trunk.lChild = temp;
     }
 
-    // swap this node's right child with trunk's right child, shout out dbz rip toriyam
+    // swap this node's right child with trunk's right child, gohannnn
     public void swapRight(Node trunk) {
         Node temp = this.rChild;
         this.rChild = trunk.rChild;
         trunk.rChild = temp;
     }
 
+    
+}
