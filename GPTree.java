@@ -31,27 +31,20 @@ public class GPTree {
             crossNodes = "";
             return;
         }
-
-        final StringBuilder sb = new StringBuilder();
-
-     
-        root.traverse(new Collector() {
-            @Override
-            public void collect(Node n) {
-                sb.append(n.asPlaceholder()).append('\n');
-            }
-        });
-
-      
-        if (sb.length() > 0) {
-            sb.setLength(sb.length() - 1);
-            crossNodes = sb.toString();
-        } else {
+        String tree = root.toString();         
+        List<String> binops = collectBinopsFromString(tree);
+        if (binops.isEmpty()) {
             crossNodes = "";
+        } else {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < binops.size(); i++) {
+                if (i > 0) sb.append('\n');
+                sb.append(binops.get(i));
+            }
+            crossNodes = sb.toString();
         }
     }
 
- 
     public String getCrossNodes() {
         return crossNodes;
     }
@@ -81,6 +74,8 @@ public class GPTree {
     }
 
 
+
+
     private List<String> collectBinopsFromString(String s) {
         List<String> out = new ArrayList<>();
         List<Integer> stack = new ArrayList<>();
@@ -101,6 +96,7 @@ public class GPTree {
         return out;
     }
 
+  
     private boolean isTopLevelBinop(String parened) {
         if (parened.length() < 3 || parened.charAt(0) != '(' || parened.charAt(parened.length() - 1) != ')') {
             return false;
@@ -121,4 +117,3 @@ public class GPTree {
         return topOps == 1;
     }
 }
-
