@@ -32,7 +32,7 @@ public class GPTree {
         if (root != null) {
             root.traverse(new Collector() {
                 public void collect(Node n) {
-                   sb.append(n.toString()).append("\n")
+                   sb.append(n.toString()).append("\n");
                 }
             });
         }
