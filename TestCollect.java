@@ -22,7 +22,15 @@ public class TestCollect {
             System.out.println(gpt.toString());
             gpt.traverse();
             String crossNodes = gpt.getCrossNodes();
-            String[] binops = crossNodes.split(";");
+            
+  
+            String[] binops;
+            if (crossNodes.isEmpty()) {
+                binops = new String[0]; 
+            } else {
+                binops = crossNodes.split(";");
+            }
+            
             int numBinops = 0;
             String fullString = gpt.toString();
             for (int i = 0; i < fullString.length(); ++i) {
