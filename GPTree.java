@@ -28,20 +28,23 @@ public class GPTree {
     }
 
   
-   public void traverse() {
+public void traverse() {
     if (root == null) {
         crossNodes = "";
         return;
     }
-    final StringBuilder sb = new StringBuilder();
-    root.traverse(new Collector() {
-        @Override
-        public void collect(Node n) {
-          
+
+    List<Node> all = new ArrayList<>();
+    collectAllNodes(root, all);
+
+
+    StringBuilder sb = new StringBuilder();
+    for (Node n : all) {
+        if (n.getOperation() instanceof Binop) {
             if (sb.length() > 0) sb.append('\n'); 
             sb.append(n.toString());
         }
-    });
+    }
     crossNodes = sb.toString();
 }
 
