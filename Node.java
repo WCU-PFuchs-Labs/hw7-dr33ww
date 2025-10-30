@@ -84,19 +84,11 @@ public class Node {
         String inner = (lChild == null) ? "?" : lChild.toPlaceholderString();
         return operation.toString() + "(" + inner + ")";
     }
-
+@Override
  public String toString() {
-    // Always return placeholder form for testing consistency
+   
     return toPlaceholderString();
-    /*
-    // Original version (kept here for reference)
-    if (operation instanceof Binop) {
-        String leftS = (lChild == null) ? "null" : lChild.toString();
-        String rightS = (rChild == null) ? "null" : rChild.toString();
-        String sym = binopSymbol((Binop) operation);
-        return "(" + leftS + " " + sym + " " + rightS + ")";
-    }
-    */
+   
 }
         if (operation instanceof Const || operation instanceof Variable) {
             return operation.toString();
