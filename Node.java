@@ -1,5 +1,7 @@
 
 
+
+
 import java.util.Random;
 
 public class Node {
@@ -7,96 +9,84 @@ public class Node {
     Node lChild;
     Node rChild;
 
-    
+    // node holding operator
     public Node(Op o) {
         this.operation = o;
         this.lChild = null;
         this.rChild = null;
     }
 
-    // build children maxdepth
-    
+   
     public void addRandomKids(NodeFactory factory, int maxDepth, Random rand) {
         if (maxDepth <= 0) {
             return; // stop growing
         }
 
         if (operation instanceof Binop) {
-            // binop needs two children
-            lChild = new Node(factory.getOperator(rand));
-            lChild.addRandomKids(factory, maxDepth - 1, rand);
+            // need two children
+            lChild = factory.getOperator(rand);
+            if (lChild != null) {
+                lChild.addRandomKids(factory, maxDepth - 1, rand);
+            }
 
-            rChild = new Node(factory.getOperator(rand));
-            rChild.addRandomKids(factory, maxDepth - 1, rand);
+            rChild = factory.getOperator(rand);
+            if (rChild != null) {
+                rChild.addRandomKids(factory, maxDepth - 1, rand);
+            }
 
         } else if (operation instanceof Unop) {
-            // unop needs one child 
-            lChild = new Node(factory.getOperator(rand));
-            lChild.addRandomKids(factory, maxDepth - 1, rand);
-            // right remains null
+            // need one child 
+            lChild = factory.getOperator(rand);
+            if (lChild != null) {
+                lChild.addRandomKids(factory, maxDepth - 1, rand);
+            }
+            // rChild stays null
 
         } else {
-            // terminal stay leaves
+           
         }
     }
 
-    // evaluate this node on the given data
+    // the operator will evaluate the nodes
     public double eval(double[] data) {
-        if (operation instanceof Binop) {
-            double a = lChild.eval(data);
-            double b = rChild.eval(data);
-            return ((Binop) operation).eval(a, b);
-        } else if (operation instanceof Unop) {
-            double a = lChild.eval(data);
-            return ((Unop) operation).eval(a);
-        } else {
-            
-            return operation.eval(data);
-        }
+        
+        return operation.eval(this, data);
     }
 
-    // conver node readable str
+    // delegate printing to the operator
     public String toString() {
-        if (operation instanceof Binop) {
-            
-            return "(" + lChild.toString() + " " + operation.toString() + " " + rChild.toString() + ")";
-        } else if (operation instanceof Unop) {
-            
-            return operation.toString() + "(" + lChild.toString() + ")";
-        } else {
-            
-            return operation.toString();
-        }
+        
+        return operation.toString(this);
     }
 
+  
 
-
-    // preorder traversal
+   
     public void traverse(Collector c) {
         c.collect(this);
         if (this.lChild != null) this.lChild.traverse(c);
         if (this.rChild != null) this.rChild.traverse(c);
     }
 
-    // check: if no children
+  //true if no children
     public boolean isLeaf() {
         return this.lChild == null && this.rChild == null;
     }
 
-    // swap this node's left child with trunk's left child, what did they do to u gohan
+    // swap this node's left child with trunk's left child, gohann
     public void swapLeft(Node trunk) {
         Node temp = this.lChild;
         this.lChild = trunk.lChild;
         trunk.lChild = temp;
     }
 
-    // swap this node's right child with trunk's right child, gohannn
+    // swap this node's right child with trunk's right child, what did they do to u gohan
     public void swapRight(Node trunk) {
         Node temp = this.rChild;
         this.rChild = trunk.rChild;
         trunk.rChild = temp;
     }
 
-  
+
 }
 
