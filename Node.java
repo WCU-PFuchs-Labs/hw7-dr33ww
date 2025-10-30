@@ -5,7 +5,6 @@ public class Node {
     Node lChild;
     Node rChild;
 
-    
     public Node(Op o) {
         this.operation = o;
         this.lChild = null;
@@ -25,31 +24,28 @@ public class Node {
             if (rChild != null) rChild.addRandomKids(factory, maxDepth - 1, rand);
 
         } else if (operation instanceof Unop) {
-            
+            // one child only
             lChild = factory.getOperator(rand);
             if (lChild != null) lChild.addRandomKids(factory, maxDepth - 1, rand);
-            
-
         } else {
-
+            // no children (const or var)
         }
     }
 
     // evaluate this node on the given data
     public double eval(double[] data) {
         if (operation instanceof Binop) {
-            double a = lChild.eval(data);
-            double b = rChild.eval(data);
+            double a = (lChild != null) ? lChild.eval(data) : 0.0;
+            double b = (rChild != null) ? rChild.eval(data) : 0.0;
             return ((Binop) operation).eval(a, b);
         } else if (operation instanceof Unop) {
-            
-            return ((Unop) operation).eval(data);
+            double a = (lChild != null) ? lChild.eval(data) : 0.0;
+            return ((Unop) operation).eval(a);
         } else if (operation instanceof Const) {
             return ((Const) operation).eval(data);
         } else if (operation instanceof Variable) {
             return ((Variable) operation).eval(data);
         } else {
-            
             throw new IllegalStateException("unknown Op type: " + operation.getClass().getName());
         }
     }
@@ -57,30 +53,25 @@ public class Node {
     // convert node to readable str
     public String toString() {
         if (operation instanceof Binop) {
-            // null-safe children to avoid NPEs during partial trees
-            String leftStr  = (lChild == null) ? "?" : lChild.toString();
-            String rightStr = (rChild == null) ? "?" : rChild.toString();
+            String leftStr = (lChild != null) ? lChild.toString() : "?";
+            String rightStr = (rChild != null) ? rChild.toString() : "?";
             return "(" + leftStr + " " + operation.toString() + " " + rightStr + ")";
         } else if (operation instanceof Unop) {
-            // null-safe for unary
-            String leftStr = (lChild == null) ? "?" : lChild.toString();
+            String leftStr = (lChild != null) ? lChild.toString() : "?";
             return operation.toString() + "(" + leftStr + ")";
         } else {
-            // terminals print themselves
             return operation.toString();
         }
     }
 
-   
-
-    //  visit self, then left, then right
-  public void traverse(Collector c) {
-    if (operation instanceof Binop) {
-        c.collect(this); // only collect binops
+    // visit self, then left, then right
+    public void traverse(Collector c) {
+        if (operation instanceof Binop) {
+            c.collect(this); // collect binops only
+        }
+        if (lChild != null) lChild.traverse(c);
+        if (rChild != null) rChild.traverse(c);
     }
-    if (lChild != null) lChild.traverse(c);
-    if (rChild != null) rChild.traverse(c);
-}
 
     // true if no children
     public boolean isLeaf() {
@@ -100,7 +91,4 @@ public class Node {
         this.rChild = trunk.rChild;
         trunk.rChild = temp;
     }
-
-   
 }
-
