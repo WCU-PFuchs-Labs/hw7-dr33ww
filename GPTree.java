@@ -34,25 +34,25 @@ public void traverse() {
         return;
     }
 
-  
-    List<Node> all = new ArrayList<>();
-    collectAllNodes(root, all);
+    final StringBuilder sb = new StringBuilder();
 
- 
-    List<String> lines = new ArrayList<>();
-    for (Node n : all) {
-        if (n.getOperation() instanceof Binop) {
-            lines.add(n.toString()); 
+    // Walk the tree and collect ONLY binops, using placeholder form
+    root.traverse(new Collector() {
+        @Override
+        public void collect(Node n) {
+            sb.append(n.asPlaceholder()).append('\n');
         }
-    }
+    });
 
-   
-    crossNodes = lines.isEmpty() ? "" : String.join("\n", lines);
+    // Trim the trailing newline if we added anything; else leave as truly empty
+    if (sb.length() > 0) {
+        sb.setLength(sb.length() - 1);
+        crossNodes = sb.toString();
+    } else {
+        crossNodes = "";
+    }
 }
 
-    public String getCrossNodes() {
-        return crossNodes;
-    }
 
     public void crossover(GPTree other, Random rand) {
         List<Node> mine = new ArrayList<>();
