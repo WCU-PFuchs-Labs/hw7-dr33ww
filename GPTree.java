@@ -6,15 +6,15 @@ public class GPTree implements Collector {
     private Node root;
     private ArrayList<Node> crossNodes;
     
-  
+   
     public void collect(Node node) {
-        
-        if (!node.isLeaf()) {
+     
+        if (node.getOperation() instanceof Binop) {
             crossNodes.add(node);
         }
     }
     
-
+  
     public void traverse() {
         crossNodes = new ArrayList<Node>();
         if (root != null) {
@@ -22,7 +22,7 @@ public class GPTree implements Collector {
         }
     }
     
-   
+  
     public String getCrossNodes() {
         if (crossNodes == null || crossNodes.isEmpty()) {
             return "";
@@ -38,10 +38,9 @@ public class GPTree implements Collector {
         return string.toString();
     }
    
-    
 
     public void crossover(GPTree tree, Random rand) {
-     
+       
         this.traverse();
         tree.traverse();
         if (this.crossNodes.isEmpty() || tree.crossNodes.isEmpty()) {
@@ -54,7 +53,6 @@ public class GPTree implements Collector {
         Node thisTrunk = crossNodes.get(thisPoint);
         Node treeTrunk = tree.crossNodes.get(treePoint);
 
-        
         if(left) {
             thisTrunk.swapLeft(treeTrunk);
         } else {
