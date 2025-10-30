@@ -25,16 +25,19 @@ public class GPTree {
         return (root == null) ? "" : root.toString();
     }
 
+
     public void traverse() {
-        final StringBuilder sb = new StringBuilder();
-        if (root != null) {
-            root.traverse(new Collector() {
-                public void collect(Node n) {
-                    sb.append(n.asPlaceholder()).append("\n");
-                }
-            });
+        if (root == null) {
+            crossNodes = "";
+            return;
         }
-        crossNodes = sb.toString();
+        final List<String> lines = new ArrayList<>();
+        root.traverse(new Collector() {
+            public void collect(Node n) {
+                lines.add(n.asPlaceholder());
+            }
+        });
+        crossNodes = String.join("\n", lines);
     }
 
     public String getCrossNodes() {
@@ -65,4 +68,5 @@ public class GPTree {
         collectAllNodes(n.getRight(), out);
     }
 }
+
 
