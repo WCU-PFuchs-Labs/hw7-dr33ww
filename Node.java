@@ -42,7 +42,7 @@ public class Node {
             double b = rChild.eval(data);
             return ((Binop) operation).eval(a, b);
         } else if (operation instanceof Unop) {
-            // fix: let Unop evaluate using the data array (it handles its child internally)
+            
             return ((Unop) operation).eval(data);
         } else if (operation instanceof Const) {
             return ((Const) operation).eval(data);
@@ -57,11 +57,14 @@ public class Node {
     // convert node to readable str
     public String toString() {
         if (operation instanceof Binop) {
-            
-            return "(" + lChild.toString() + " " + operation.toString() + " " + rChild.toString() + ")";
+            // null-safe children to avoid NPEs during partial trees
+            String leftStr  = (lChild == null) ? "?" : lChild.toString();
+            String rightStr = (rChild == null) ? "?" : rChild.toString();
+            return "(" + leftStr + " " + operation.toString() + " " + rightStr + ")";
         } else if (operation instanceof Unop) {
-           
-            return operation.toString() + "(" + lChild.toString() + ")";
+            // null-safe for unary
+            String leftStr = (lChild == null) ? "?" : lChild.toString();
+            return operation.toString() + "(" + leftStr + ")";
         } else {
             // terminals print themselves
             return operation.toString();
@@ -98,3 +101,4 @@ public class Node {
 
    
 }
+
