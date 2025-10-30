@@ -12,8 +12,10 @@ public class GPTree {
     }
 
     public GPTree(NodeFactory factory, int maxDepth, Random rand) {
-        root = factory.getOperator(rand);
-        if (root != null) root.addRandomKids(factory, maxDepth - 1, rand);
+        root = factory.randomNode(maxDepth, rand);
+
+
+if (root != null) root.addRandomKids(factory, maxDepth, rand);
     }
 
     public Node getRoot() { return root; }
