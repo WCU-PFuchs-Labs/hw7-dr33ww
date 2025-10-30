@@ -39,9 +39,8 @@ public class Node {
             double b = (rChild != null) ? rChild.eval(data) : 0.0;
             return ((Binop) operation).eval(a, b);
         } else if (operation instanceof Unop) {
-            double a = (lChild != null) ? lChild.eval(data) : 0.0;
-            return ((Unop) operation).eval(a);
-        } else if (operation instanceof Const) {
+    return ((Unop) operation).eval(data);
+} else if (operation instanceof Const) {
             return ((Const) operation).eval(data);
         } else if (operation instanceof Variable) {
             return ((Variable) operation).eval(data);
