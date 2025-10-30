@@ -1,37 +1,37 @@
 import java.util.Random;
 
 public class NodeFactory {
-    private final int numIndepVars;
-    private final Node[] currentOps;
+    
+    private Binop[] binops;
+    
+    private int numIndepVars;
 
-    public NodeFactory(Binop[] binops, int numVars) {
-        this.numIndepVars = numVars;
-        this.currentOps = new Node[binops.length];
-        for (int i = 0; i < binops.length; i++) {
-            this.currentOps[i] = new Node(binops[i]);
-        }
+    
+    public NodeFactory(Binop[] ops, int numIndepVars) {
+        this.binops = ops;
+        this.numIndepVars = numIndepVars;
     }
 
+    
     public Node getOperator(Random rand) {
-        int index = rand.nextInt(currentOps.length);
-        Binop cloned = (Binop) currentOps[index].operation.clone();
-        return new Node(cloned);
-    }
+        // decide... operator vs terminal 
+        boolean chooseOp = rand.nextBoolean();
 
-    public int getNumOps() {
-        return currentOps.length;
-    }
-
-    public Node getTerminal(Random rand) {
-        int pick = rand.nextInt(numIndepVars + 1);
-        if (pick < numIndepVars) {
-            return new Node(new Variable(pick));
+        if (chooseOp && binops != null && binops.length > 0) {
+            
+            int i = rand.nextInt(binops.length);
+            return new Node(binops[i]); 
         } else {
-            return new Node(new Const(rand.nextDouble()));
-        }
-    }
 
-    public int getNumIndepVars() {
-        return numIndepVars;
+            boolean chooseVar = (numIndepVars > 0) && rand.nextBoolean();
+            if (chooseVar) {
+                int varIndex = rand.nextInt(numIndepVars); 
+                return new Node(new Variable(varIndex));
+            } else {
+                // simple random constant in [0,1); tweak if your project prefers a different range
+                double value = rand.nextDouble();
+                return new Node(new Const(value));
+            }
+        }
     }
 }
