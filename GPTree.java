@@ -34,18 +34,20 @@ public void traverse() {
         return;
     }
 
+  
     List<Node> all = new ArrayList<>();
     collectAllNodes(root, all);
 
-
-    StringBuilder sb = new StringBuilder();
+ 
+    List<String> lines = new ArrayList<>();
     for (Node n : all) {
         if (n.getOperation() instanceof Binop) {
-            if (sb.length() > 0) sb.append('\n'); 
-            sb.append(n.toString());
+            lines.add(n.toString()); 
         }
     }
-    crossNodes = sb.toString();
+
+   
+    crossNodes = lines.isEmpty() ? "" : String.join("\n", lines);
 }
 
     public String getCrossNodes() {
