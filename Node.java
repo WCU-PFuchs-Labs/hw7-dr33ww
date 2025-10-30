@@ -1,89 +1,53 @@
-import java.util.Random;
+public class Node {
+    Op op;
+    Node lChild;
+    Node rChild;
 
-public class Node implements Cloneable {
-    protected Node left, right;
-    protected Op operation;
-    protected int depth = 0;
-
-    public Node(Binop op) {
-        this.operation = op;
+    public Node(Op o) {
+        op = o;
+        lChild = null;
+        rChild = null;
     }
 
-    public Node(Unop op) {
-        this.operation = op;
+    public void addRandomKids(NodeFactory n, int maxDepth, java.util.Random rand) {
+        op.addRandomKids(this, n, maxDepth, rand);
     }
 
-    // add random children to the node recursively
-    public void addRandomKids(NodeFactory nf, int maxDepth, Random rand) {
-        if (operation instanceof Unop) return;
-
-        if (depth >= maxDepth) {
-            left = nf.getTerminal(rand);
-            left.depth = this.depth + 1;
-            right = nf.getTerminal(rand);
-            right.depth = this.depth + 1;
-            return;
-        }
-
-        java.util.function.Consumer<Boolean> makeChild = isLeft -> {
-            int span = nf.getNumOps() + nf.getNumIndepVars();
-            int r = rand.nextInt(span + 1);
-
-            Node child;
-            if (r < nf.getNumOps()) {
-                child = nf.getOperator(rand);
-                child.depth = this.depth + 1;
-                if (isLeft) this.left = child;
-                else this.right = child;
-                child.addRandomKids(nf, maxDepth, rand);
-            } else {
-                child = nf.getTerminal(rand);
-                child.depth = this.depth + 1;
-                if (isLeft) this.left = child;
-                else this.right = child;
-            }
-        };
-
-        makeChild.accept(true);
-        makeChild.accept(false);
-    }
-
-    public Object clone() {
-        Object o = null;
-        try {
-            o = super.clone();
-        } catch (CloneNotSupportedException e) {
-            System.out.println("Node can't clone.");
-        }
-        Node b = (Node) o;
-
-        if (left != null) b.left = (Node) left.clone();
-        if (right != null) b.right = (Node) right.clone();
-        if (operation != null) b.operation = (Op) operation.clone();
-
-        return b;
-    }
-
-    // recursively evaluate the expression tree
     public double eval(double[] data) {
-        if (operation instanceof Binop) {
-            Binop bop = (Binop) operation;
-            double leftVal = left.eval(data);
-            double rightVal = right.eval(data);
-            return bop.eval(leftVal, rightVal);
-        } else if (operation instanceof Unop) {
-            Unop uop = (Unop) operation;
-            return uop.eval(data);
-        } else {
-            throw new RuntimeException("Unknown operation type in Node");
-        }
+        return op.eval(this, data);
     }
 
     public String toString() {
-        if (operation instanceof Binop) {
-            return "(" + left.toString() + " " + operation.toString() + " " + right.toString() + ")";
-        } else {
-            return operation.toString();
-        }
+        return op.toString(this);
+    }
+
+   
+
+    // vis all nodes in preorder
+    public void traverse(Collector c) {
+        c.collect(this);
+        if (this.lChild != null) this.lChild.traverse(c);
+        if (this.rChild != null) this.rChild.traverse(c);
+    }
+
+    // return true if this node has no children (a leaf)
+    public boolean isLeaf() {
+        boolean hasLeft = (this.lChild != null);
+        boolean hasRight = (this.rChild != null);
+        return !(hasLeft || hasRight);
+    }
+
+    // swap this nodes left child with trunks left child shout out dragon ball z
+    public void swapLeft(Node trunk) {
+        Node temp = this.lChild;
+        this.lChild = trunk.lChild;
+        trunk.lChild = temp;
+    }
+
+    // swap this node's right child with trunk's right child, i was so tempted to call this node gohan but
+    public void swapRight(Node trunk) {
+        Node temp = this.rChild;
+        this.rChild = trunk.rChild;
+        trunk.rChild = temp;
     }
 }
