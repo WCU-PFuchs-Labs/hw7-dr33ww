@@ -81,7 +81,6 @@ public class Node {
 
     @Override
     public String toString() {
-       
         return toPlaceholderString();
     }
 
@@ -93,21 +92,42 @@ public class Node {
         return "?";
     }
 
+   
     public void traverse(Collector c) {
-        if (operation instanceof Binop) c.collect(this);
-        if (lChild != null) lChild.traverse(c);
-        if (rChild != null) rChild.traverse(c);
-    }
 
+        c.collect(this);
+        
+
+        if (lChild != null) {
+            lChild.traverse(c);
+        }
+        
+
+        if (rChild != null) {
+            rChild.traverse(c);
+        }
+    }
+    
+ 
+    public void swapLeft(Node trunk) {
+        Node temp = this.lChild;
+        this.lChild = trunk.lChild;
+        trunk.lChild = temp;
+    }
+    
+
+    public void swapRight(Node trunk) {
+        Node temp = this.rChild;
+        this.rChild = trunk.rChild;
+        trunk.rChild = temp;
+    }
+    
+
+    public boolean isLeaf() {
+        return operation instanceof Const || operation instanceof Variable;
+    }
+    
     public String asPlaceholder() {
-        if (operation instanceof Binop) {
-            String sym = binopSymbol((Binop) operation);
-            return "(? " + sym + " ?)";
-        }
-        if (operation instanceof Const || operation instanceof Variable) {
-            return "?";
-        }
-        // For unary operations
-        return operation.toString() + "(?)";
+        return toPlaceholderString();
     }
 }
